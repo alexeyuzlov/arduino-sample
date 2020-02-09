@@ -1,51 +1,88 @@
-#include <IRremote.h>
+// https://github.com/Makuna/Rtc/blob/master/examples/DS3231_Simple/DS3231_Simple.ino
 
-int RECV_PIN = 11;
+#include "SevenSegmentTM1637.h"
+#include "SevenSegmentExtended.h"
 
-const int LED_PIN = 9;
-boolean ledValue = false;
-const unsigned long VALUE = 3772784863;
-unsigned long latest = -1;
+#include <Wire.h> // must be included here so that Arduino library object file references work
+#include <RtcDS3231.h>
+RtcDS3231<TwoWire> Rtc(Wire);
 
-IRrecv irrecv(RECV_PIN);
+const int BRIGHTNESS_PIN = A0;
 
-decode_results results;
+/* initialize global TM1637 Display object
+*  The constructor takes two arguments, the number of the clock pin and the digital output pin:
+* SevenSegmentTM1637(byte pinCLK, byte pinDIO);
+*/
+const byte PIN_CLK = 2; // define CLK pin (any digital pin)
+const byte PIN_DIO = 3; // define DIO pin (any digital pin)
+SevenSegmentExtended display(PIN_CLK, PIN_DIO);
 
+unsigned long latestForDate = 0;
+unsigned long latestForBrightness = 0;
+const int DEBOUNCE_DATE = 1000;
+const int DEBOUNCE_BRIGHTNESS = 50;
+int brightnessInPercents = 50;
+int brightnessRawValue = 0;
+
+// run setup code
 void setup()
 {
-  Serial.begin(9600);
-  // In case the interrupt driver crashes on setup, give a clue
-  // to the user what's going on.
-  Serial.println("Enabling IRin");
-  irrecv.enableIRIn(); // Start the receiver
-  Serial.println("Enabled IRin");
-  pinMode(LED_PIN, OUTPUT);
+  pinMode(BRIGHTNESS_PIN, INPUT);
+
+  display.begin();           // initializes the display
+
+  Rtc.Begin();
+  // setupRTC();
 }
 
 void loop()
 {
-  if (irrecv.decode(&results))
+  unsigned long currentTime = millis();
+
+  if (currentTime > latestForBrightness + DEBOUNCE_BRIGHTNESS)
   {
-    Serial.println(results.value);
-
-    if (results.value == VALUE) {
-      toggleLED();
-      delay(100);
-    }
-
-    irrecv.resume(); // Receive the next value
+    latestForBrightness = currentTime;
+    brightnessRawValue = analogRead(BRIGHTNESS_PIN);
+    brightnessInPercents = map(brightnessRawValue, 0, 1023, 0, 100);
+    brightnessInPercents = constrain(brightnessInPercents, 0, 100);
+    display.setBacklight(brightnessInPercents);
   }
 
-  delay(100);
-}
+  if (currentTime > latestForDate + DEBOUNCE_DATE)
+  {
+    latestForDate = currentTime;
 
-void toggleLED() {
-  ledValue = !ledValue;
-  if (ledValue) {
-    digitalWrite(LED_PIN, HIGH);
-  } else {
-    digitalWrite(LED_PIN, LOW);
+    RtcDateTime now = Rtc.GetDateTime();
+    display.printTime(now.Hour(), now.Minute(), true);
   }
+};
+
+void setupRTC() {
   
-  Serial.println("Success, ledValue is: " + String(digitalRead(LED_PIN)));
+  RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
+
+  if (!Rtc.IsDateTimeValid())
+  {
+    if (Rtc.LastError() != 0)
+    {
+    }
+    else
+    {
+      Rtc.SetDateTime(compiled);
+    }
+  }
+
+  if (!Rtc.GetIsRunning())
+  {
+    Rtc.SetIsRunning(true);
+  }
+
+  RtcDateTime now = Rtc.GetDateTime();
+  if (now < compiled)
+  {
+    Rtc.SetDateTime(compiled);
+  }
+
+  Rtc.Enable32kHzPin(false);
+  Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone);
 }
