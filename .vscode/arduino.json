@@ -1,7 +1,6 @@
 {
     "sketch": "sample.ino",
-    "board": "arduino:avr:uno",
-    "port": "COM8",
-    "output": "output",
-    "programmer": "AVRISP mkII"
+    "board": "arduino:avr:nano",
+    "configuration": "cpu=atmega328old",
+    "port": "COM3"
 }

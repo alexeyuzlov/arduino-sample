@@ -2,24 +2,20 @@
     "configurations": [
         {
             "name": "Win32",
-            "defines": [
-                "ARDUINO=10800",
-                "USBCON"
-            ],
             "includePath": [
                 "${workspaceRoot}",
-                "C:\\arduino\\hardware\\tools\\**",
-                "C:\\arduino\\libraries\\**",
-                "C:\\arduino\\hardware\\arduino\\avr\\**",
-                "C:\\arduino\\tools\\**"
+                "C:\\programs\\arduino-1.8.12\\hardware\\arduino\\avr\\**",
+                "C:\\programs\\arduino-1.8.12\\tools\\**",
+                "C:\\programs\\arduino-1.8.12\\hardware\\tools\\**",
+                "C:\\programs\\arduino-1.8.12\\libraries\\**"
             ],
             "forcedInclude": [
-                "C:\\arduino\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
+                "C:\\programs\\arduino-1.8.12\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
             ],
-            "intelliSenseMode": "clang-x64",
+            "intelliSenseMode": "msvc-x64",
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe",
             "cStandard": "c11",
-            "cppStandard": "c++17",
-            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe"
+            "cppStandard": "c++17"
         }
     ],
     "version": 4
